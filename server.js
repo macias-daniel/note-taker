@@ -40,9 +40,11 @@ app.post("/api/notes", (req, res)=>{
         const savedNotes = JSON.parse(data)
 
         //Give the new note an id of the length of the array 
-        if (savedNotes > 0 ){
+        if (savedNotes.length > 0 ){
+            console.log("adding to end")
             newNote.id = savedNotes[savedNotes.length - 1].id + 1
         } else {
+            console.log("there is no note setting id to 1")
             newNote.id = 1
         }
 
@@ -60,7 +62,7 @@ app.post("/api/notes", (req, res)=>{
 app.delete("/api/notes/:deleteNote",(req,res)=>{
 
     //Grab the key of the note that is going to be deleted
-    const noteToDelete = req.params.deleteNote;
+    const noteToDelete = parseInt(req.params.deleteNote);
 
     // Get the previously saved notes
     fs.readFile("./db/db.json", (err,data) =>{
@@ -68,19 +70,15 @@ app.delete("/api/notes/:deleteNote",(req,res)=>{
         //Save previous notes data
         const savedNotes = JSON.parse(data) 
 
-        //Go through every element of savedNotes
-        for(let i = 0; i < savedNotes.length; i++){
+        //Create  a new array containing values not equal to the id of the id we want to delete
+        const newData = savedNotes.filter(note => note.id != noteToDelete)
 
-            //When it finds the coresponding id delete it from the array
-            if(savedNotes[i].id === parseInt(noteToDelete)){
-                savedNotes.splice(i, 1)
-                
-                //Write new data in db.json
-                fs.writeFile("./db/db.json", JSON.stringify(savedNotes), err =>{
-                    res.end()
-                })
-            }
-        }
+        //Write new data in db.json
+        fs.writeFile("./db/db.json", JSON.stringify(newData), err =>{
+            res.end()
+        })
+            
+    
     })
 })
 
